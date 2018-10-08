@@ -1,6 +1,7 @@
 apiVersion: 3scale.net/v1alpha1
 kind: API
-name: api-management-as-code-demo
+metadata:
+  name: api-management-as-code-demo
 spec:
   3scaleConfig:
     IntegrationMethod: apicast
