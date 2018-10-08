@@ -1,0 +1,102 @@
+---
+
+apiVersion: v1
+kind: Template
+metadata:
+  name: rhte-na-demo-template
+  annotations:
+    description: "Template creates a BuildConfig with Jenkins pipeline strategy and Job which watches a Git repo for changes and trigger a Build"
+objects:
+- kind: "BuildConfig"
+  apiVersion: "v1"
+  metadata:
+    name: ${BUILD_NAME}
+  spec:
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+
+          // These files are used to create the operator
+          def crdPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/crd.yaml'
+          def rbacPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/rbac.yaml'
+          def operatorDefinitionPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/operator.yaml'
+
+          def apiPath = 'https://raw.githubusercontent.com/jmprusi/rhte-na-demo/master/apis/demo-api.yaml'
+
+          pipeline {
+              agent none
+
+              stages {
+                  stage('setup') {
+                      steps {
+                          script {
+                              openshift.withCluster() {
+                                  if (openshift.selector( "deployment", "threescaleapi").exists()) {
+                                      echo "3scale API operator exists"
+                                  } else {
+                                      try {
+                                          openshift.create(crdPath)
+                                      } catch (err) {
+                                          echo "${err}"
+                                      }
+
+                                      try {
+                                          openshift.create(rbacPath)
+                                      } catch (err) {
+                                          echo "${err}"
+                                      }
+
+                                      openshift.create(operatorDefinitionPath)
+                                  }
+                              }
+                          }
+                      }
+                  }
+                  stage('reconcile') {
+                      steps {
+                          script {
+                              openshift.withCluster() {
+                                  sh "wget -O /tmp/test-yaml.yaml $apiPath"
+                                  openshift.apply(readFile( '/tmp/test-yaml.yaml' ))
+                              }
+                          }
+                      }
+                  }
+                  stage('test') {
+                      steps {
+                          script {
+                            echo "Fill me with some API specific tests"
+                          }
+                      }
+                  }
+              }
+          }
+        type: JenkinsPipeline
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: git-watcher
+  spec:
+    parallelism: 1
+    completions: 1
+    template:
+      metadata:
+        name: git-watcher
+      spec:
+        serviceAccountName: git-watcher
+        containers:
+        - name: git-watcher
+          image: docker.io/philipgough/rhte-na-demo
+          command: ["bash",  "/tmp/run.sh"]
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: BUILD_NAME
+              value: ${BUILD_NAME}
+        restartPolicy: OnFailure
+parameters:
+- description: The name of the build to start
+  required: true
+  name: BUILD_NAME
