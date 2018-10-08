@@ -56,7 +56,7 @@ objects:
                       steps {
                           script {
                               openshift.withCluster() {
-                                  sh "wget -O /tmp/test-yaml.yaml $apiPath"
+                                  sh "wget -N -O /tmp/test-yaml.yaml $apiPath"
                                   openshift.apply(readFile( '/tmp/test-yaml.yaml' ))
                               }
                           }
