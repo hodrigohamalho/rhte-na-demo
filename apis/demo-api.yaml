@@ -84,7 +84,7 @@ spec:
             - metric: hits
               increment: 1
             - metric: list_pets
-              increment: 1
+              increment: 2 
           post:
             tags:
             - pets
