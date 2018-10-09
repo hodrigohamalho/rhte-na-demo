@@ -8,7 +8,9 @@ spec:
     secret:
       name: demo-credentials-secret
   plans:
-  - limits:
+  - name: basic
+    default: true
+    limits:
     - max: 100
       metric: hits
       period: month
@@ -22,7 +24,7 @@ spec:
       metric: list_pets
       period: minute
     name: basic
-  - default: true
+  - name: premium
     limits:
     - max: 1000
       metric: hits
@@ -36,130 +38,130 @@ spec:
     - max: 10
       metric: list_pets
       period: minute
-    name: premium
   upstream: https://echo-api.3scale.net:443
   OpenAPIDefinition: |-
-    openapi: "3.0.0"
-    info:
-      version: 1.0.0
-      title: Swagger Petstore
-      license:
-        name: MIT
-    servers:
-      - url: http://petstore.swagger.io/v1
-    paths:
-      /pets:
-        get:
-          x-3scale-metrics:
-            - metric: hits
-              increment: 1
-            - metric: list_pets
-              increment: 1
-          summary: List all pets
-          operationId: listPets
-          tags:
+      openapi: 3.0.0
+      info:
+        title: RHTE NA Api Management As Code demo
+        license:
+          name: MIT
+        version: 1.0.0
+      paths:
+        /pets:
+          get:
+            tags:
             - pets
-          parameters:
+            summary: List all pets
+            operationId: listPets
+            parameters:
             - name: limit
               in: query
               description: How many items to return at one time (max 100)
               required: false
               schema:
-                type: integer
                 format: int32
-          responses:
-            '200':
-              description: A paged array of pets
-              headers:
-                x-next:
-                  description: A link to the next page of responses
-                  schema:
-                    type: string
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/Pets"
-            default:
-              description: unexpected error
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/Error"
-        post:
-          x-3scale-metrics:
+                type: integer
+            responses:
+              200:
+                description: A paged array of pets
+                headers:
+                  x-next:
+                    description: A link to the next page of responses
+                    schema:
+                      type: string
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Pets'
+              default:
+                description: unexpected error
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Error'
+            x-3scale-metrics:
+            - metric: hits
+              increment: 1
+            - metric: list_pets
+              increment: 1
+          post:
+            tags:
+            - pets
+            summary: Create a pet
+            operationId: createPets
+            responses:
+              201:
+                description: Null response
+              default:
+                description: unexpected error
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Error'
+            x-3scale-metrics:
             - metric: hits
               increment: 1
             - metric: create_pet
               increment: 1
-          summary: Create a pet
-          operationId: createPets
-          tags:
+        /pets/{petId}:
+          get:
+            tags:
             - pets
-          responses:
-            '201':
-              description: Null response
-            default:
-              description: unexpected error
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/Error"
-      /pets/{petId}:
-        get:
-          x-3scale-metrics:
+            summary: Info for a specific pet
+            operationId: showPetById
+            parameters:
+            - name: petId
+              in: path
+              description: The id of the pet to retrieve
+              required: true
+              schema:
+                type: string
+            responses:
+              200:
+                description: Expected response to a valid request
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Pets'
+              default:
+                description: unexpected error
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/Error'
+            x-3scale-metrics:
             - metric: hits
               increment: 1
             - metric: get_pet
               increment: 1
-          summary: Info for a specific pet
-          operationId: showPetById
-          tags:
-            - pets
-          parameters:
-            - name: petId
-              in: path
-              required: true
-              description: The id of the pet to retrieve
-              schema:
-                type: string
-          responses:
-            '200':
-              description: Expected response to a valid request
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/Pets"
-            default:
-              description: unexpected error
-              content:
-                application/json:
-                  schema:
-                    $ref: "#/components/schemas/Error"
-    components:
-      schemas:
-        Pet:
-          required:
+      components:
+        schemas:
+          Pet:
+            required:
             - id
             - name
-          properties:
-            id:
-              type: integer
-              format: int64
-            name:
-              type: string
-            tag:
-              type: string
-        Pets:
-          type: array
-          items:
-            $ref: "#/components/schemas/Pet"
-        Error:
-          required:
+            properties:
+              id:
+                format: int64
+                type: integer
+              name:
+                type: string
+              tag:
+                type: string
+          Pets:
+            type: array
+            items:
+              $ref: '#/components/schemas/Pet'
+          Error:
+            required:
             - code
             - message
-          properties:
-            code:
-              type: integer
-              format: int32
-            message:
-              type: string
+            properties:
+              code:
+                format: int32
+                type: integer
+              message:
+                type: string
+      tags:
+      - name: 3scale
+        description: Enables 3scale definitions on APIcurio
