@@ -82,7 +82,7 @@ spec:
                       $ref: '#/components/schemas/Error'
             x-3scale-metrics:
             - metric: hits
-              increment: 1
+              increment: 2
             - metric: list_pets
               increment: 1
           post:
@@ -103,7 +103,7 @@ spec:
             - metric: hits
               increment: 1
             - metric: create_pet
-              increment: 2
+              increment: 1
         /pets/{petId}:
           get:
             tags:
