@@ -84,7 +84,7 @@ spec:
             - metric: hits
               increment: 1
             - metric: list_pets
-              increment: 2
+              increment: 1
           post:
             tags:
             - pets
@@ -103,7 +103,7 @@ spec:
             - metric: hits
               increment: 1
             - metric: create_pet
-              increment: 1
+              increment: 2
         /pets/{petId}:
           get:
             tags:
