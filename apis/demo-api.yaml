@@ -15,7 +15,7 @@ spec:
     - max: 100
       metric: hits
       period: month
-    - max: 10
+    - max: 15
       metric: hits
       period: minute
     - max: 0
