@@ -16,59 +16,35 @@ objects:
       jenkinsPipelineStrategy:
         jenkinsfile: |-
 
-          // These files are used to create the operator
-          def crdPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/crd.yaml'
-          def rbacPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/rbac.yaml'
-          def operatorDefinitionPath = 'https://raw.githubusercontent.com/3scale/ostia/backend-poc/threescaleAPI-operator/deploy/operator.yaml'
-
           def apiPath = 'https://raw.githubusercontent.com/jmprusi/rhte-na-demo/master/apis/demo-api.yaml'
 
           pipeline {
               agent none
-
               stages {
-                  stage('setup') {
-                      steps {
-                          script {
-                              openshift.withCluster() {
-                                  if (openshift.selector( "deployment", "threescaleapi").exists()) {
-                                      echo "3scale API operator exists"
-                                  } else {
-                                      try {
-                                          openshift.create(crdPath)
-                                      } catch (err) {
-                                          echo "${err}"
-                                      }
-
-                                      try {
-                                          openshift.create(rbacPath)
-                                      } catch (err) {
-                                          echo "${err}"
-                                      }
-
-                                      openshift.create(operatorDefinitionPath)
-                                  }
-                              }
-                          }
-                      }
-                  }
-                  stage('reconcile') {
+                  stage('Build') {
                       steps {
                           script {
                               openshift.withCluster() {
                                   sh "wget -N -O /tmp/test-yaml.yaml $apiPath"
-                                  openshift.apply(readFile( '/tmp/test-yaml.yaml' ))
+                                  openshift.apply(readFile('/tmp/test-yaml.yaml'))
                               }
                           }
                       }
                   }
-                  stage('test') {
+                  stage('Testing') {
                       steps {
                           script {
-                            echo "Fill me with some API specific tests"
+                            echo "Example: Run Code + API tests"
                           }
                       }
                   }
+                 stage('Promote API config to production') {
+                   steps {
+                     script { 
+                      echo "Example: Promote API config to production"
+                       }
+                   }
+                 }
               }
           }
         type: JenkinsPipeline
