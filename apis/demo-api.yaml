@@ -5,8 +5,9 @@ metadata:
 spec:
   3scaleConfig:
     IntegrationMethod: apicast
-    secret:
-      name: demo-credentials-secret
+    credentials:
+      secret:
+        name: demo-credentials-secret
   plans:
   - name: basic
     default: true
