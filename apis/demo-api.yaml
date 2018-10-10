@@ -21,7 +21,7 @@ spec:
     - max: 0
       metric: create_pet
       period: eternity
-    - max: 5
+    - max: 10 
       metric: list_pets
       period: minute
     name: basic
