@@ -108,7 +108,7 @@ spec:
           get:
             tags:
             - pets
-            summary: Info for a specific pet
+            summary: Info of a specific pet
             operationId: showPetById
             parameters:
             - name: petId
