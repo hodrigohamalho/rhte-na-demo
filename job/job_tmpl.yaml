@@ -48,30 +48,6 @@ objects:
               }
           }
         type: JenkinsPipeline
-- apiVersion: batch/v1
-  kind: Job
-  metadata:
-    name: git-watcher
-  spec:
-    parallelism: 1
-    completions: 1
-    template:
-      metadata:
-        name: git-watcher
-      spec:
-        serviceAccountName: git-watcher
-        containers:
-        - name: git-watcher
-          image: docker.io/philipgough/rhte-na-demo
-          command: ["bash",  "/tmp/run.sh"]
-          env:
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: BUILD_NAME
-              value: ${BUILD_NAME}
-        restartPolicy: OnFailure
 parameters:
 - description: The name of the build to start
   required: true
