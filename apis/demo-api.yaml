@@ -48,6 +48,13 @@ spec:
           name: MIT
         version: 1.0.0
       paths:
+        /:
+          get:
+            x-3scale-metrics:
+              - metric: hits
+                increment: 1
+              - metric: mynewmetric
+                increment: 1
         /pets:
           get:
             tags:
