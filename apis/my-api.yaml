@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: RHTE NA Api Management As Code demo
+  license:
+    name: MIT
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      tags:
+      - pets
+      summary: List all pets
+      operationId: listPets
+      parameters:
+      - name: limit
+        in: query
+        description: How many items to return at one time (max 100)
+        required: false
+        schema:
+          format: int32
+          type: integer
+      responses:
+        200:
+          description: A paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pets'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-3scale-metrics:
+      - metric: hits
+        increment: 1
+      - metric: list_pets
+        increment: 1
+    post:
+      tags:
+      - pets
+      summary: Create a pet
+      operationId: createPets
+      responses:
+        201:
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-3scale-metrics:
+      - metric: hits
+        increment: 1
+      - metric: create_pet
+        increment: 1
+  /pets/{petId}:
+    get:
+      tags:
+      - pets
+      summary: Info of a specific pet
+      operationId: showPetById
+      parameters:
+      - name: petId
+        in: path
+        description: The id of the pet to retrieve
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: Expected response to a valid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pets'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-3scale-metrics:
+      - metric: hits
+        increment: 1
+      - metric: get_pet
+        increment: 1
+components:
+  schemas:
+    Pet:
+      required:
+      - id
+      - name
+      properties:
+        id:
+          format: int64
+          type: integer
+        name:
+          type: string
+        tag:
+          type: string
+    Pets:
+      type: array
+      items:
+        $ref: '#/components/schemas/Pet'
+    Error:
+      required:
+      - code
+      - message
+      properties:
+        code:
+          format: int32
+          type: integer
+        message:
+          type: string
+tags:
+- name: 3scale
+  description: Enables 3scale definitions on APIcurio
